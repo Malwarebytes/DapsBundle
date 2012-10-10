@@ -45,6 +45,6 @@ services:
             - %daps_ldap.ldap.admin.enable%
             - %daps_ldap.ldap.admin.dn%
             - %daps_ldap.ldap.admin.password%
-            - %daps_ldap.ldap.admin.version%
-            - %daps_ldap.ldap.admin.usessl%
-            - %daps_ldap.ldap.admin.usestarttls%
+            - %daps_ldap.ldap.version%
+            - %daps_ldap.ldap.usessl%
+            - %daps_ldap.ldap.usestarttls%
