@@ -22,6 +22,18 @@ class DapsLdapExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
+        $container->setParameter('daps_ldap.ldap.host', $config['host']);
+        $container->setParameter('daps_ldap.ldap.port', $config['port']);
+        $container->setParameter('daps_ldap.ldap.dn', $config['dn']);
+        $container->setParameter('daps_ldap.ldap.username_suffix', $config['username_suffix']);
+        $container->setParameter('daps_ldap.ldap.version', $config['version']);
+        $container->setParameter('daps_ldap.ldap.usessl', $config['use_ssl']);
+        $container->setParameter('daps_ldap.ldap.usestarttls', $config['use_start_tls']);
+        $container->setParameter('daps_ldap.ldap.optrefs', $config['opt_referrals']);
+        $container->setParameter('daps_ldap.ldap.admin.enable', $config['admin_login']);
+        $container->setParameter('daps_ldap.ldap.admin.dn', $config['admin_user']);
+        $container->setParameter('daps_ldap.ldap.admin.password', $config['admin_pass']);
+
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
     }

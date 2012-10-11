@@ -63,7 +63,7 @@ class LdapUserProvider implements LdapUserProviderInterface
                 throw new AuthenticationException("The account for user {$username} is inactive.");
             }
         }
-        
+
         try {
             $this->ldap->setUsername($username);
             $this->ldap->setPassword($password);
@@ -71,12 +71,12 @@ class LdapUserProvider implements LdapUserProviderInterface
         } catch (ConnectionException $e) {
             throw new UsernameNotFoundException(sprintf('The presented password is invalid. "%s"', $e->getMessage()));
         }
-        
+
         $roleArray = $this->ldap->getBoundRolesByOrgs();
-        
+
         $user = new LdapUser($username, null, $roleArray);
         $user->setLdapListing($this->ldap->getBoundListing());
-        
+
         return $user;
     }
 
