@@ -30,9 +30,11 @@ class DapsLdapExtension extends Extension
         $container->setParameter('daps_ldap.ldap.usessl', $config['use_ssl']);
         $container->setParameter('daps_ldap.ldap.usestarttls', $config['use_start_tls']);
         $container->setParameter('daps_ldap.ldap.optrefs', $config['opt_referrals']);
+        $container->setParameter('daps_ldap.ldap.group_suffix', $config['group_suffix']);
         $container->setParameter('daps_ldap.ldap.admin.enable', $config['admin_login']);
         $container->setParameter('daps_ldap.ldap.admin.dn', $config['admin_user']);
         $container->setParameter('daps_ldap.ldap.admin.password', $config['admin_pass']);
+        $container->setParameter('daps_ldap_user_provider.inactive_key_value', $config['inactive_key_value']);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');

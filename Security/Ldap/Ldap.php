@@ -24,9 +24,10 @@ class Ldap implements LdapInterface
     private $enableAdmin;
     private $adminDn;
     private $adminPassword;
-    
+    private $groupSuffix;
+
     private $boundListing;
-    
+
     private $connection;
 
 	/**
@@ -44,7 +45,7 @@ class Ldap implements LdapInterface
      * @param boolean $useStartTls
      * @param boolean $optReferrals
      */
-    public function __construct($host = null, $port = 389, $dn = null, $usernameSuffix = null, $enableAdmin = false, $adminDn = null, $adminPassword = null, $version = 3, $useSsl = false, $useStartTls = false, $optReferrals = false )
+    public function __construct($host = null, $port = 389, $dn = null, $usernameSuffix = null, $enableAdmin = false, $adminDn = null, $adminPassword = null, $version = 3, $useSsl = false, $useStartTls = false, $optReferrals = false, $groupSuffix = null )
     {
         if (!extension_loaded('ldap')) {
             throw new LdapException('Ldap module is needed. ');
@@ -60,11 +61,12 @@ class Ldap implements LdapInterface
         $this->version          = $version;
         $this->useSsl           = (boolean) $useSsl;
         $this->useStartTls      = (boolean) $useStartTls;
-        $this->optReferrals     = (boolean) $optReferrals;        
+        $this->optReferrals     = (boolean) $optReferrals;
+        $this->groupSuffix      = $groupSuffix;
 
         $this->connection = null;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -73,10 +75,10 @@ class Ldap implements LdapInterface
         if (!$this->connection) {
             $this->connect();
         }
-    
+
         return $this->connection;
     }
-    
+
     public function __destruct()
     {
         $this->disconnect();
@@ -89,14 +91,14 @@ class Ldap implements LdapInterface
     {
         return $this->host;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function setHost($host)
     {
         $this->host = $host;
-    
+
         return $this;
     }
 
@@ -104,11 +106,11 @@ class Ldap implements LdapInterface
     {
         return $this->port;
     }
-    
+
     public function setPort($port)
     {
         $this->port = $port;
-    
+
         return $this;
     }
 
@@ -119,17 +121,17 @@ class Ldap implements LdapInterface
     {
         return $this->dn;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function setDn($dn)
     {
         $this->dn = $dn;
-    
+
         return $this;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -137,17 +139,17 @@ class Ldap implements LdapInterface
     {
         return $this->usernameSuffix;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function setUsernameSuffix($usernameSuffix)
     {
         $this->usernameSuffix = $usernameSuffix;
-    
+
         return $this;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -155,17 +157,17 @@ class Ldap implements LdapInterface
     {
         return $this->version;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function setVersion($version)
     {
         $this->version = $version;
-    
+
         return $this;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -173,17 +175,17 @@ class Ldap implements LdapInterface
     {
         return $this->useSsl;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function setUseSsl($useSsl)
     {
         $this->useSsl = (boolean) $useSsl;
-    
+
         return $this;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -191,17 +193,17 @@ class Ldap implements LdapInterface
     {
         return $this->useStartTls;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function setUseStartTls($useStartTls)
     {
         $this->useStartTls = (boolean) $useStartTls;
-    
+
         return $this;
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -209,17 +211,29 @@ class Ldap implements LdapInterface
     {
         return $this->optReferrals;
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function setOptReferrals($optReferrals)
     {
         $this->optReferrals = (boolean) $optReferrals;
-    
+
         return $this;
     }
-    
+
+    public function getGroupSuffix()
+    {
+        return $this->groupSuffix;
+    }
+
+    public function setGroupSuffix($groupSuffix)
+    {
+        $this->groupSuffix = $groupSuffix;
+
+        return $this;
+    }
+
     public function getUsername()
     {
         return $this->username;
@@ -255,24 +269,24 @@ class Ldap implements LdapInterface
         }
         return $listings[0];
     }
-    
+
     public function findListingsByUsername($username, $query, $filter = '*')
     {
         if (!$this->connection) {
             $this->connect();
         }
-    
+
         if (!is_array($filter)) {
             $filter = array($filter);
         }
-    
+
         $query    = $this->getDnAndValue($username);
         $search   = ldap_search($this->connection, $this->usernameSuffix, $query, $filter);
         $listings = ldap_get_entries($this->connection, $search);
-    
+
         return $listings;
     }
-    
+
     private function connect()
     {
         if (!$this->connection) {
@@ -281,14 +295,14 @@ class Ldap implements LdapInterface
                 $host = 'ldaps://' . $host;
             }
             $this->connection = ldap_connect($host, $this->getPort());
-            
+
             ldap_set_option($this->connection, LDAP_OPT_PROTOCOL_VERSION, $this->getVersion());
             ldap_set_option($this->connection, LDAP_OPT_REFERRALS, $this->getOptReferrals());
-            
+
             if ($this->getUseStartTls()) {
                 ldap_start_tls($this->connection);
             }
-            
+
             if ($this->enableAdmin) {
                 if ( ($this->adminDn === null) || ($this->adminPassword === null) ) {
                     throw new ConnectionException('Admin bind required but credentials not provided. Please see ldapcredentials.yml.');
@@ -300,15 +314,20 @@ class Ldap implements LdapInterface
         }
         return $this;
     }
-    
+
+    private function bindToAdminCredentials()
+    {
+        return @ldap_bind($this->connection, $this->adminDn, $this->adminPassword);
+    }
+
     public function bind()
     {
         if (!$this->connection) {
             $this->connect();
         }
-        
+
         $usernameListings = $this->findListingsByUsername($this->username, $this->usernameSuffix);
-        
+
         for ( $i=0; $i < $usernameListings['count']; $i++ )
         {
             $listing = $usernameListings[$i];
@@ -321,13 +340,13 @@ class Ldap implements LdapInterface
         // if we got here, we couldn't bind to any of the listings that were provided
         throw new ConnectionException(sprintf('Username / password invalid to connect on Ldap server %s:%s', $this->host, $this->port));
     }
-    
+
     public function unbind()
     {
         if (is_resource($this->connection)) {
             ldap_unbind($this->connection);
         }
-        
+
         return $this;
     }
 
@@ -349,7 +368,7 @@ class Ldap implements LdapInterface
      * Any control characters with an ASCII code < 32 as well as the characters with special meaning in
      * LDAP filters "*", "(", ")", and "\" (the backslash) are converted into the representation of a
      * backslash followed by two hex digits representing the hexadecimal value of the character.
-    
+
      * @see Net_LDAP2_Util::escape_filter_value() from Benedikt Hallinger <beni@php.net>
      * @link http://pear.php.net/package/Net_LDAP2
      * @author Benedikt Hallinger <beni@php.net>
@@ -374,10 +393,10 @@ class Ldap implements LdapInterface
         if (null === $value) {
             $value = '\0'; // apply escaped "null" if string is empty
         }
-    
+
         return $value;
     }
-    
+
     public function usernameHasListing($username, $key, $value)
     {
         if (!$this->connection) {
@@ -385,7 +404,7 @@ class Ldap implements LdapInterface
         }
         $search = ldap_search($this->connection, $this->usernameSuffix, $this->getDnAndValue($username));
         $infos  = ldap_get_entries($this->connection, $search);
-        
+
         return (   $infos['count'] > 0
                 && isset($infos[0][$key])
                 && ($infos[0][$key]['count'] > 0)
@@ -398,12 +417,12 @@ class Ldap implements LdapInterface
         $username = $username ?: $this->username;
         return $this->getUsernameWithSuffix($this->getDnAndValue($username));
     }
-    
+
     private function getDnAndValue($username)
     {
         return sprintf('%s=%s', $this->dn, $username);
     }
-    
+
     public function getUsernameWithSuffix($username = null)
     {
         if (null === $username) {
@@ -412,14 +431,21 @@ class Ldap implements LdapInterface
 
         return $username.','.$this->usernameSuffix;
     }
-    
+
     public function getBoundRolesByOrgs()
     {
+        // @todo set default role in config?
+        $roles = array('ROLE_USER');
+
         if ( $this->boundListing === null ) {
             $this->bind();
-        } 
+        }
+
+        if($this->enableAdmin) {
+            $this->bindToAdminCredentials();
+        }
+
         if (isset($this->boundListing['memberof'])) {
-            $roles = array();
             foreach ($this->boundListing['memberof'] as $fullOuListing)
             {
                 $matches = array();
@@ -429,13 +455,43 @@ class Ldap implements LdapInterface
                     $roles[] = 'ROLE_'.strtoupper(preg_replace('/.*=/', '', $membership));
                 }
             }
-            return array_unique($roles);
         }
-        
-        // @todo set default role in config?
-        return array('ROLE_USER');
+
+        if(isset($this->groupSuffix)) {
+            $roles = array_merge($roles, $this->getGroupBasedRoles());
+        }
+
+        return array_unique($roles);
     }
-    
+
+    private function getGroupBasedRoles()
+    {
+        $this->connect();
+
+        $result = @ldap_search($this->connection, $this->groupSuffix, "(memberUid={$this->username})");
+        $groups = ldap_get_entries($this->connection, $result);
+
+        $roles = array();
+
+        foreach($groups as $group) {
+            if(!isset($group['dn'])) {
+                continue;
+            }
+
+            $role = array('ROLE', 'USER');
+            $localdn = substr($group['dn'], 0, strpos($group['dn'], $this->groupSuffix) - 1);
+            $dnparts = explode(',', $localdn);
+            foreach($dnparts as $part) {
+                $pieces = explode('=', $part);
+                $role[] = strtoupper(array_pop($pieces));
+            }
+
+            $roles[] = join('_', $role);
+        }
+
+        return $roles;
+    }
+
     public function getBoundListing()
     {
         return $this->boundListing;

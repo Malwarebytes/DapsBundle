@@ -33,6 +33,8 @@ class Configuration implements ConfigurationInterface
                 ->booleanNode('admin_login')->defaultFalse()->end()
                 ->scalarNode('admin_user')->defaultValue('')->end()
                 ->scalarNode('admin_pass')->defaultValue('')->end()
+                ->scalarNode('inactive_key_value')->defaultValue('status=locked')->end()
+                ->scalarNode('group_suffix')->defaultValue('')->end()
             ->end()
         ;
 
