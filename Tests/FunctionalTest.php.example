@@ -1,0 +1,23 @@
+<?php
+
+namespace Acme\DemoBundle\Tests\Controller;
+
+use Daps\LdapBundle\Test\AuthenticatedWebTestCase;
+
+/**
+ * Example functional test taken from Acme\DemoBundle
+ *
+ * Note the use of AuthenticatedWebTestCase and createClientWithLDAPAuthentication
+ */
+class DemoControllerTest extends AuthenticatedWebTestCase
+{
+    public function testIndex()
+    {
+        $client = static::createClientWithLDAPAuthentication("secured_area");
+
+        $crawler = $client->request('GET', '/symfony/demo/hello/Fabien');
+
+        echo $crawler->text();
+        $this->assertTrue($crawler->filter('html:contains("Hello Fabien")')->count() > 0, "hello controller is not responding or not wired up correctly.");
+    }
+}
