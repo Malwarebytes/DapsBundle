@@ -11,3 +11,9 @@ we can easily extend these changes for our own purposes.
 * [Pull request](https://github.com/symfony/symfony/pull/5189/files)
 * [Full branch from lyrixx](https://github.com/lyrixx/symfony/compare/master...feat-security-ldap)
 * [Blog post about Daps](http://robertelwell.info/blog/daps-ldap-symfony2/)
+
+
+
+###PHPUnit Testing With Authentication
+
+Please refer to the example in Tests\FunctionalTests.php.example
