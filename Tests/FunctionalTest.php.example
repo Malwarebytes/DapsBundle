@@ -2,18 +2,18 @@
 
 namespace Acme\DemoBundle\Tests\Controller;
 
-use Daps\LdapBundle\Test\AuthenticatedWebTestCase;
+use Daps\LdapBundle\Test\AuthenticatedWebTestHelper;
 
 /**
  * Example functional test taken from Acme\DemoBundle
  *
  * Note the use of AuthenticatedWebTestCase and createClientWithLDAPAuthentication
  */
-class DemoControllerTest extends AuthenticatedWebTestCase
+class DemoControllerTest extends \Symfony\Bundle\FrameworkBundle\Test\WebTestCase
 {
     public function testIndex()
     {
-        $client = static::createClientWithLDAPAuthentication("secured_area");
+        $client = AuthenticatedWebTestHelper::createClientWithLDAPAuthentication("secured_area");
 
         $crawler = $client->request('GET', '/symfony/demo/hello/Fabien');
 
